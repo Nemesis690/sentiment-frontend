@@ -1,7 +1,7 @@
 // Automatically switch between local and production API
 const API = window.location.hostname.includes("localhost") || window.location.hostname.includes("127.0.0.1")
   ? "http://127.0.0.1:5000"
-  : "https://<your-railway-subdomain>.railway.app"; // <-- change to your actual Railway backend URL
+  : "https://sentiment-backend-production.up.railway.app"; // <-- change to your actual Railway backend URL
 
 // Single text analyze
 document.getElementById("analyzeBtn").addEventListener("click", async () => {
@@ -141,3 +141,4 @@ function escapeHtml(s) {
 
 // Initial history load
 loadHistory();
+
