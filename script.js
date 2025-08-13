@@ -1,14 +1,32 @@
 // Automatically switch between local and production API
 const API = window.location.hostname.includes("localhost") || window.location.hostname.includes("127.0.0.1")
   ? "http://127.0.0.1:5000"
-  : "https://sentiment-backend-production.up.railway.app"; // <-- change to your Railway backend URL
+  : "https://sentiment-backend-production.up.railway.app";
 
-// List of explicit words to block
-const bannedWords = ["fuck", "ass", "rape" , "penis" , "cum" , "dick" , "vagina", "pussy" , "sex"]; // Add your words here
+// Load banned words from TXT file
+let bannedWords = [];
+fetch('en.txt')
+  .then(res => res.text())
+  .then(data => {
+    bannedWords = data.split('\n').map(word => word.trim()).filter(Boolean);
+    console.log("Loaded banned words:", bannedWords.length);
+  })
+  .catch(err => console.error("Error loading banned words:", err));
 
+// Check if text contains explicit words
 function containsExplicit(text) {
   const lowerText = text.toLowerCase();
-  return bannedWords.some(word => lowerText.includes(word));
+  return bannedWords.some(word => new RegExp(`\\b${word}\\b`, 'i').test(lowerText));
+}
+
+// Replace explicit words with asterisks
+function censorText(text) {
+  let censored = text;
+  bannedWords.forEach(word => {
+    const regex = new RegExp(`\\b${word}\\b`, 'gi');
+    censored = censored.replace(regex, '*'.repeat(word.length));
+  });
+  return censored;
 }
 
 // Single text analyze
@@ -23,7 +41,7 @@ document.getElementById("analyzeBtn").addEventListener("click", async () => {
   }
 
   if (containsExplicit(text)) {
-    resultDiv.innerHTML = "Please,Keep your language to yourself!";
+    resultDiv.innerHTML = "Please, keep your language to yourself!";
     return;
   }
 
@@ -160,5 +178,6 @@ function escapeHtml(s) {
 
 // Initial history load
 loadHistory();
+
 
 
