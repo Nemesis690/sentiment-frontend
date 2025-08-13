@@ -5,7 +5,7 @@ const API = window.location.hostname.includes("localhost") || window.location.ho
 
 // Load banned words from TXT file
 let bannedWords = [];
-fetch('en.txt')
+fetch('en_explicit.txt')
   .then(res => res.text())
   .then(data => {
     bannedWords = data.split('\n').map(word => word.trim()).filter(Boolean);
@@ -178,6 +178,7 @@ function escapeHtml(s) {
 
 // Initial history load
 loadHistory();
+
 
 
 
