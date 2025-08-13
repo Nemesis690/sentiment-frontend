@@ -1,19 +1,32 @@
 // Automatically switch between local and production API
 const API = window.location.hostname.includes("localhost") || window.location.hostname.includes("127.0.0.1")
   ? "http://127.0.0.1:5000"
-  : "https://sentiment-backend-production.up.railway.app"; // <-- change to your actual Railway backend URL
+  : "https://sentiment-backend-production.up.railway.app"; // <-- change to your Railway backend URL
+
+// List of explicit words to block
+const bannedWords = ["fuck", "ass", "rape" , "penis" , "cum" , "dick" , "vagina", "pussy" , "sex"]; // Add your words here
+
+function containsExplicit(text) {
+  const lowerText = text.toLowerCase();
+  return bannedWords.some(word => lowerText.includes(word));
+}
 
 // Single text analyze
 document.getElementById("analyzeBtn").addEventListener("click", async () => {
   const text = document.getElementById("inputText").value.trim();
   const resultDiv = document.getElementById("result");
   resultDiv.innerHTML = "Analyzing...";
-  
+
   if (!text) { 
     resultDiv.innerHTML = "Please type some text."; 
     return; 
   }
-  
+
+  if (containsExplicit(text)) {
+    resultDiv.innerHTML = "Please,Keep your language to yourself!";
+    return;
+  }
+
   try {
     const r = await fetch(`${API}/analyze`, {
       method: "POST",
@@ -52,7 +65,14 @@ document.getElementById("analyzeCsvBtn").addEventListener("click", async () => {
       alert(j.error || "Error processing CSV"); 
       return; 
     }
-    displayResultsTable(j.results || []);
+
+    // Filter results with explicit words
+    const filteredResults = (j.results || []).map(r => ({
+      ...r,
+      text: containsExplicit(r.text) ? "[Blocked: Explicit Language]" : r.text
+    }));
+
+    displayResultsTable(filteredResults);
   } catch (e) {
     alert("Error contacting server");
     console.error(e);
@@ -97,9 +117,10 @@ async function loadHistory() {
       histDiv.innerHTML = "<div class='small'>No history yet.</div>"; 
       return; 
     }
-    histDiv.innerHTML = list.slice(0, 50).map(it => 
-      `<div class="history-item ${it.sentiment.toLowerCase()}"><strong>${it.sentiment}</strong> — ${it.confidence}%<div class="small">${escapeHtml(it.text)}</div></div>`
-    ).join("");
+    histDiv.innerHTML = list.slice(0, 50).map(it => {
+      const safeText = containsExplicit(it.text) ? "[Blocked: Explicit Language]" : it.text;
+      return `<div class="history-item ${it.sentiment.toLowerCase()}"><strong>${it.sentiment}</strong> — ${it.confidence}%<div class="small">${escapeHtml(safeText)}</div></div>`;
+    }).join("");
   } catch (e) {
     histDiv.innerHTML = "Could not load history.";
   }
@@ -134,11 +155,10 @@ function displayResultsTable(results) {
 }
 
 function escapeHtml(s) {
-  return (s || "").replace(/[&<>"']/g, m => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  })[m]);
+  return (s || "").replace(/[&<>"']/g, m => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[m]));
 }
 
 // Initial history load
 loadHistory();
+
 
