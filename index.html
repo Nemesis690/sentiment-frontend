@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Sentiment Analyzer (TensorFlow)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="card">
+    <h1>Sentiment Analyzer (TF) — CSV Batch</h1>
+
+    <textarea id="inputText" placeholder="Paste a tweet, review, or message..."></textarea>
+    <div class="controls">
+      <button id="analyzeBtn">Analyze</button>
+      <input type="file" id="csvFile" accept=".csv" />
+      <button id="analyzeCsvBtn">Analyze CSV</button>
+      <button id="downloadResultsBtn">Download Results CSV</button>
+      <button id="showHistoryBtn">Show History</button>
+    </div>
+
+    <div id="result" class="result"></div>
+
+    <h3>Batch Results</h3>
+    <div id="tableContainer"></div>
+
+    <h3>History</h3>
+    <div id="history"></div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
